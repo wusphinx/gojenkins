@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"net/url"
@@ -376,6 +377,35 @@ func (j *Job) GetConfig(ctx context.Context) (string, error) {
 		return "", err
 	}
 	return data, nil
+}
+
+func (j *Job) GetBuildByQueueID(ctx context.Context, queueID int64) (*Build, error) {
+	var data string
+	type Response struct {
+		XMLName xml.Name `xml:"build"`
+		Text    string   `xml:",chardata"`
+		Class   string   `xml:"_class,attr"`
+		ID      int64    `xml:"id"`
+		Number  int64    `xml:"number"`
+		QueueID int64    `xml:"queueId"`
+	}
+
+	query := map[string]string{
+		"tree":  "builds[id,number,result,queueId]",
+		"xpath": fmt.Sprintf("//build[queueId=%d]", queueID),
+	}
+
+	_, err := j.Jenkins.Requester.GetXML(ctx, j.Base+"/api/xml", &data, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var res Response
+	if err := xml.Unmarshal([]byte(data), &res); err != nil {
+		return nil, err
+	}
+
+	return j.GetBuild(ctx, res.Number)
 }
 
 func (j *Job) GetParameters(ctx context.Context) ([]ParameterDefinition, error) {
