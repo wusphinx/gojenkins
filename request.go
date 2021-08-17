@@ -147,7 +147,9 @@ func (r *Requester) redirectPolicyFunc(req *http.Request, via []*http.Request) e
 }
 
 func (r *Requester) Do(ctx context.Context, ar *APIRequest, responseStruct interface{}, options ...interface{}) (*http.Response, error) {
-	if !strings.HasSuffix(ar.Endpoint, "/") && ar.Method != "POST" {
+	if !strings.HasSuffix(ar.Endpoint, "/") &&
+		ar.Method != "POST" &&
+		!strings.HasSuffix(ar.Endpoint, "xml") {
 		ar.Endpoint += "/"
 	}
 
