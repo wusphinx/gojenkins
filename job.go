@@ -408,7 +408,7 @@ func (j *Job) GetBuildByQueueID(ctx context.Context, queueID int64) (*Build, err
 
 	var res Response
 	if err := xml.Unmarshal([]byte(data), &res); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v error: %v", data, err)
 	}
 
 	return j.GetBuild(ctx, res.Number)
