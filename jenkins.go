@@ -239,6 +239,11 @@ func (j *Jenkins) UpdateJob(ctx context.Context, job string, config string) *Job
 	return &jobObj
 }
 
+func (j *Jenkins) UpdateJobV2(ctx context.Context, job string, config string) error {
+	jobObj := Job{Jenkins: j, Raw: new(JobResponse), Base: "/job/" + job}
+	return jobObj.UpdateConfig(ctx, config)
+}
+
 // Rename a job.
 // First parameter job old name, Second parameter job new name.
 func (j *Jenkins) RenameJob(ctx context.Context, job string, name string) *Job {
